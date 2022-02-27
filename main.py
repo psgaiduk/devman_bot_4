@@ -7,8 +7,11 @@ import redis
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Filters, Updater
 from telegram.ext import CallbackQueryHandler, CommandHandler, MessageHandler
+from logger_handler import BotHandler
+
 
 _database = None
+logger = logging.getLogger('app_logger')
 
 
 def start(bot, update):
@@ -88,7 +91,7 @@ def handle_users_reply(bot, update):
         next_state = state_handler(bot, update)
         db.set(chat_id, next_state)
     except Exception as err:
-        print(err)
+        logging.exception(err)
 
 
 def get_database_connection():
@@ -108,7 +111,15 @@ def main():
     dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
     if os.path.exists(dotenv_path):
         load_dotenv(dotenv_path)
+
     token = os.getenv("TELEGRAM_TOKEN")
+    logger_token = os.getenv("TOKEN_TELEGRAM_LOGGER")
+    logger_chat_id = os.getenv("CHAT_ID")
+
+    logging.basicConfig(level=logging.INFO, format='{asctime} - {levelname} - {name} - {message}', style='{')
+    logger.addHandler(BotHandler(logger_token, logger_chat_id))
+    logger.info('Начало работы телеграмм бота Интернет магазин')
+
     updater = Updater(token)
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CallbackQueryHandler(button))
