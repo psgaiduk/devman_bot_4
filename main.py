@@ -21,7 +21,7 @@ def get_token(moltin_client_id, moltin_client_secret):
     return data_for_token['access_token']
 
 
-def get_products(token):
+def get_products(token, product_id=''):
     url = 'https://api.moltin.com/v2/products'
     header = {'authorization': f'Bearer {token}', 'content-type': 'application/json'}
     return get(url, headers=header).json()['data']
@@ -42,8 +42,12 @@ def start(_, update, moltin_client_id, moltin_client_secret):
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    update.message.reply_text('Please choose:', reply_markup=reply_markup)
-    return "ECHO"
+    update.message.reply_text('Выберите рыбу:', reply_markup=reply_markup)
+    return "HANDLE_MENU"
+
+
+def handle_menu(bot, update):
+    print(bot, update)
 
 
 def echo(bot, update):
@@ -58,10 +62,20 @@ def echo(bot, update):
     return "ECHO"
 
 
-def button(bot, update):
+def button(bot, update, moltin_client_id, moltin_client_secret, db):
     query = update.callback_query
 
-    bot.edit_message_text(text="Selected option: {}".format(query.data),
+    token = get_token(moltin_client_id, moltin_client_secret)
+    product = get_products(token, product_id=f'/{query.data}')[0]
+
+    print(product)
+
+    message = f'{product["name"]}\n\n{product["description"]}\n' \
+              f'{product["meta"]["display_price"]["with_tax"]["formatted"]} за кг.\n' \
+              f'В наличии: {product["meta"]["stock"]["level"]} кг.'
+    print(message)
+
+    bot.edit_message_text(text=message,
                           chat_id=query.message.chat_id,
                           message_id=query.message.message_id)
 
@@ -87,6 +101,7 @@ def handle_users_reply(bot, update, moltin_client_id, moltin_client_secret, db):
         chat_id = update.callback_query.message.chat_id
     else:
         return
+    print(user_reply)
     if user_reply == '/start':
         user_state = 'START'
     else:
@@ -98,7 +113,8 @@ def handle_users_reply(bot, update, moltin_client_id, moltin_client_secret, db):
 
     states_functions = {
         'START': start_with_args,
-        'ECHO': echo
+        'ECHO': echo,
+        'HANDLE_MENU': handle_menu,
     }
     state_handler = states_functions[user_state]
     # Если вы вдруг не заметите, что python-telegram-bot перехватывает ошибки.
@@ -136,9 +152,15 @@ def main():
                                            moltin_client_secret=moltin_client_secret,
                                            db=database)
 
+    button_with_args = partial(button,
+                               moltin_client_id=moltin_client_id,
+                               moltin_client_secret=moltin_client_secret,
+                               db=database
+                               )
+
     updater = Updater(token)
     dispatcher = updater.dispatcher
-    dispatcher.add_handler(CallbackQueryHandler(button))
+    dispatcher.add_handler(CallbackQueryHandler(button_with_args))
     dispatcher.add_handler(CallbackQueryHandler(handle_users_reply_with_args))
     dispatcher.add_handler(MessageHandler(Filters.text, handle_users_reply_with_args))
     dispatcher.add_handler(CommandHandler('start', handle_users_reply_with_args))
