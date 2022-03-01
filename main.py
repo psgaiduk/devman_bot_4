@@ -36,7 +36,7 @@ def add_to_cart(token, product_id, chat_id, quantity):
     url = f'https://api.moltin.com/v2/carts/{chat_id}/items'
     data = {"data": {"id": product_id, "type": "cart_item", "quantity": quantity}}
     header = {'authorization': f'Bearer {token}', 'content-type': 'application/json'}
-    add_item = post(url, headers=header, json=data)
+    post(url, headers=header, json=data)
 
 
 def get_cart(token, chat_id):
@@ -154,7 +154,7 @@ def send_photo_product(token, bot, product_id, query, reply_markup):
                        message_id=query.message.message_id)
 
 
-def handle_menu(bot, update, moltin_client_id, moltin_client_secret, db):
+def handle_menu(bot, update, moltin_client_id, moltin_client_secret):
     query = update.callback_query
 
     token = get_token(moltin_client_id, moltin_client_secret)
@@ -277,8 +277,7 @@ def handle_users_reply(bot, update, moltin_client_id, moltin_client_secret, db):
 
     handle_menu_with_args = partial(handle_menu,
                                     moltin_client_id=moltin_client_id,
-                                    moltin_client_secret=moltin_client_secret,
-                                    db=db)
+                                    moltin_client_secret=moltin_client_secret,)
 
     handle_description_with_args = partial(handle_description,
                                            moltin_client_id=moltin_client_id,
