@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 from requests import get, post, delete
-
 import os
 import logging
 import redis
@@ -9,6 +8,7 @@ from telegram.ext import Filters, Updater
 from telegram.ext import CallbackQueryHandler, CommandHandler, MessageHandler
 from logger_handler import BotHandler
 from functools import partial
+import re
 
 logger = logging.getLogger('app_logger')
 
@@ -37,7 +37,6 @@ def add_to_cart(token, product_id, chat_id, quantity):
     data = {"data": {"id": product_id, "type": "cart_item", "quantity": quantity}}
     header = {'authorization': f'Bearer {token}', 'content-type': 'application/json'}
     add_item = post(url, headers=header, json=data)
-    print(add_item.text)
 
 
 def get_cart(token, chat_id):
@@ -53,7 +52,23 @@ def get_cart(token, chat_id):
 def delete_item_from_cart(token, chat_id, item_id):
     url = f'https://api.moltin.com/v2/carts/{chat_id}/items/{item_id}'
     header = {'authorization': f'Bearer {token}', 'content-type': 'application/json'}
-    print(delete(url, headers=header))
+    delete(url, headers=header)
+
+
+def create_customer_in_cms(token, chat_id, email, db):
+    url = f'https://api.moltin.com/v2/customers'
+    header = {'authorization': f'Bearer {token}', 'content-type': 'application/json'}
+    data = {
+     "data": {
+       "type": "customer",
+       "name": str(chat_id),
+       "email": email,
+       "password": "mysecretpassword"
+     }
+    }
+    customer = post(url, headers=header, json=data)
+    customer_id = customer.json()['data']['id']
+    db.set(f'customer_{chat_id}', customer_id)
 
 
 def create_start_menu(token, bot, chat_id, query):
@@ -203,16 +218,31 @@ def handle_cart(bot, update, moltin_client_id, moltin_client_secret):
         message = 'Пришлите вашу почту, мы с вами свяжемся'
         bot.send_message(text=message,
                          chat_id=chat_id,
-                         message_id=query.message.message_id,
-                         reply_markup=None)
-
-        bot.delete_message(chat_id=chat_id,
-                           message_id=query.message.message_id)
+                         message_id=query.message.message_id,)
         return "HANDLE_WAIT_EMAIL"
     else:
         delete_item_from_cart(token, chat_id, query.data)
         create_cart(bot, token, chat_id, query)
         return "HANDLE_CART"
+
+
+def handle_wait_email(bot, update, moltin_client_id, moltin_client_secret, db):
+    email = update.message.text
+    pattern = r"^[-\w\.]+@([-\w]+\.)+[-\w]{2,4}$"
+
+    if re.match(pattern, email):
+        token = get_token(moltin_client_id, moltin_client_secret)
+        message = f'Вы указали этот email {email}'
+        create_customer_in_cms(token, update.message.chat_id, email, db)
+        # status = 'HANDLE_PHONE'
+    else:
+        message = 'Вы указали не корректный email'
+        # status = 'HANDLE_EMAIL'
+
+    bot.send_message(text=message,
+                     chat_id=update.message.chat_id,)
+
+    # return status
 
 
 def handle_users_reply(bot, update, moltin_client_id, moltin_client_secret, db):
@@ -258,17 +288,21 @@ def handle_users_reply(bot, update, moltin_client_id, moltin_client_secret, db):
                                     moltin_client_id=moltin_client_id,
                                     moltin_client_secret=moltin_client_secret,)
 
+    handle_wait_email_with_args = partial(handle_wait_email,
+                                          moltin_client_id=moltin_client_id,
+                                          moltin_client_secret=moltin_client_secret,
+                                          db=db)
+
     states_functions = {
         'START': start_with_args,
         'HANDLE_MENU': handle_menu_with_args,
         'HANDLE_DESCRIPTION': handle_description_with_args,
         'HANDLE_CART': handle_cart_with_args,
+        'HANDLE_WAIT_EMAIL': handle_wait_email_with_args,
     }
     state_handler = states_functions[user_state]
-    print(state_handler)
     try:
         next_state = state_handler(bot, update)
-        print(next_state)
         db.set(chat_id, next_state)
     except Exception as err:
         logging.exception(err)
