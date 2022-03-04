@@ -138,11 +138,17 @@ def send_photo_product(token, bot, product_id, query, reply_markup):
 
     image_id = product['relationships']['main_image']['data']['id']
     image_product = get_image_product(token, product_id=image_id)
-    print(image_product)
+
+    _, cart_items = get_cart(token, query.message.chat_id)
+
+    quantity_item = [item['quantity'] for item in cart_items if item['product_id'] == product_id]
+    text_quantity = ''
+    if quantity_item:
+        text_quantity = f'\n\nВ корзине уже {quantity_item[0]} кг'
 
     message = f'{product["name"]}\n\n{product["description"]}\n' \
               f'{product["meta"]["display_price"]["with_tax"]["formatted"]} за кг.\n' \
-              f'В наличии: {product["meta"]["stock"]["level"]} кг.'
+              f'В наличии: {product["meta"]["stock"]["level"]} кг.{text_quantity}'
 
     bot.send_photo(photo=image_product,
                    caption=message,
