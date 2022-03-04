@@ -29,7 +29,8 @@ def get_products(token, product_id=''):
 def get_image_product(token, product_id):
     url = f'https://api.moltin.com/v2/files/{product_id}'
     header = {'authorization': f'Bearer {token}', 'content-type': 'application/json'}
-    return get(url, headers=header).json()['data']['link']['href']
+    # return get(url, headers=header).json()['data']['link']['href']
+    return 'https://e1.edimdoma.ru/data/ingredients/0000/5509/5509-ed4_wide.jpg'
 
 
 def add_to_cart(token, product_id, chat_id, quantity):
@@ -119,9 +120,6 @@ def create_cart(bot, token, chat_id, query):
 def start(_, update, moltin_client_id, moltin_client_secret):
     """
     Хэндлер для состояния START.
-
-    Бот отвечает пользователю фразой "Привет!" и переводит его в состояние ECHO.
-    Теперь в ответ на его команды будет запускаеться хэндлер echo.
     """
 
     token = get_token(moltin_client_id, moltin_client_secret)
@@ -140,6 +138,7 @@ def send_photo_product(token, bot, product_id, query, reply_markup):
 
     image_id = product['relationships']['main_image']['data']['id']
     image_product = get_image_product(token, product_id=image_id)
+    print(image_product)
 
     message = f'{product["name"]}\n\n{product["description"]}\n' \
               f'{product["meta"]["display_price"]["with_tax"]["formatted"]} за кг.\n' \
@@ -190,6 +189,7 @@ def handle_description(bot, update, moltin_client_id, moltin_client_secret):
 
         return "HANDLE_CART"
     else:
+        query.answer('Товар добавлен')
         weight, product_id = query.data.split(' - ')
         add_to_cart(token, product_id, chat_id, int(weight))
 
