@@ -1,3 +1,4 @@
+import telegram
 from dotenv import load_dotenv
 from requests import get, post, delete
 import os
@@ -96,9 +97,9 @@ def create_cart(bot, token, chat_id, query):
         items = []
         for item in cart_items:
             items.append({'id': item['id'], 'name': item['name']})
-            message += f'\n\n\n{item["name"]}\n\n' \
+            message += f'\n\n\n*{item["name"]}*\n\n' \
                        f'{item["quantity"]} кг - за {item["meta"]["display_price"]["with_tax"]["value"]["formatted"]}'
-        message += f'\n\nОбщая цена {cart_price}'
+        message += f'\n\n*Общая цена {cart_price}*'
         keyboard = [[InlineKeyboardButton(f'Оплатить товары на сумму: {cart_price}', callback_data='payment')]]
 
         keyboard.extend([[InlineKeyboardButton(f'Убрать из корзины {item["name"]}', callback_data=item['id'])]
@@ -111,7 +112,8 @@ def create_cart(bot, token, chat_id, query):
     bot.send_message(text=message,
                      chat_id=chat_id,
                      message_id=query.message.message_id,
-                     reply_markup=reply_markup)
+                     reply_markup=reply_markup,
+                     parse_mode=telegram.ParseMode.MARKDOWN)
 
     bot.delete_message(chat_id=chat_id,
                        message_id=query.message.message_id)
@@ -146,14 +148,15 @@ def send_photo_product(token, bot, product_id, query, reply_markup):
     if quantity_item:
         text_quantity = f'\n\nВ корзине уже {quantity_item[0]} кг'
 
-    message = f'{product["name"]}\n\n{product["description"]}\n' \
+    message = f'*{product["name"]}*\n\n{product["description"]}\n' \
               f'{product["meta"]["display_price"]["with_tax"]["formatted"]} за кг.\n' \
               f'В наличии: {product["meta"]["stock"]["level"]} кг.{text_quantity}'
 
     bot.send_photo(photo=image_product,
                    caption=message,
                    chat_id=query.message.chat_id,
-                   reply_markup=reply_markup)
+                   reply_markup=reply_markup,
+                   parse_mode=telegram.ParseMode.MARKDOWN)
 
     bot.delete_message(chat_id=query.message.chat_id,
                        message_id=query.message.message_id)
