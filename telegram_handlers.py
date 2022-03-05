@@ -2,7 +2,7 @@ import re
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 import logging
 from functools import partial
-from telegram_function import send_photo_product, create_cart, create_start_menu
+from telegram_function import send_product_photo, create_cart, create_start_menu
 
 logger = logging.getLogger('app_logger')
 
@@ -37,7 +37,7 @@ def handle_menu(bot, update, moltin):
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    send_photo_product(moltin, bot, query.data, query, reply_markup)
+    send_product_photo(moltin, bot, query.data, query, reply_markup)
 
     return "HANDLE_DESCRIPTION"
 
@@ -69,7 +69,7 @@ def handle_description(bot, update, moltin):
 
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        send_photo_product(moltin, bot, product_id, query, reply_markup)
+        send_product_photo(moltin, bot, product_id, query, reply_markup)
         return "HANDLE_DESCRIPTION"
 
 

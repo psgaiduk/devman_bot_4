@@ -51,7 +51,7 @@ def create_cart(bot, moltin, chat_id, query):
                        message_id=query.message.message_id)
 
 
-def send_photo_product(moltin, bot, product_id, query, reply_markup):
+def send_product_photo(moltin, bot, product_id, query, reply_markup):
     product = moltin.get_products(product_id=f'/{product_id}')
 
     image_id = product['relationships']['main_image']['data']['id']
