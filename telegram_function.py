@@ -12,12 +12,12 @@ def create_start_menu(moltin, bot, chat_id, query):
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    bot.delete_message(chat_id=chat_id,
-                       message_id=query.message.message_id)
-
     bot.send_message(reply_markup=reply_markup, text='Выберите рыбу:',
                      chat_id=chat_id,
                      message_id=query.message.message_id)
+
+    bot.delete_message(chat_id=chat_id,
+                       message_id=query.message.message_id)
 
 
 def create_cart(bot, moltin, chat_id, query):
@@ -41,14 +41,14 @@ def create_cart(bot, moltin, chat_id, query):
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    bot.delete_message(chat_id=chat_id,
-                       message_id=query.message.message_id)
-
     bot.send_message(text=message,
                      chat_id=chat_id,
                      message_id=query.message.message_id,
                      reply_markup=reply_markup,
                      parse_mode=ParseMode.MARKDOWN)
+
+    bot.delete_message(chat_id=chat_id,
+                       message_id=query.message.message_id)
 
 
 def send_photo_product(moltin, bot, product_id, query, reply_markup):
@@ -68,11 +68,11 @@ def send_photo_product(moltin, bot, product_id, query, reply_markup):
               f'{product["meta"]["display_price"]["with_tax"]["formatted"]} за кг.\n' \
               f'В наличии: {product["meta"]["stock"]["level"]} кг.{text_quantity}'
 
-    bot.delete_message(chat_id=query.message.chat_id,
-                       message_id=query.message.message_id)
-
     bot.send_photo(photo=image_product,
                    caption=message,
                    chat_id=query.message.chat_id,
                    reply_markup=reply_markup,
                    parse_mode=ParseMode.MARKDOWN)
+
+    bot.delete_message(chat_id=query.message.chat_id,
+                       message_id=query.message.message_id)
