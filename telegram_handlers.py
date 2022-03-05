@@ -93,20 +93,20 @@ def handle_cart(bot, update, moltin):
 
 def handle_wait_email(bot, update, moltin, db):
     email = update.message.text
+    # Взято здесь
+    # https://ru.stackoverflow.com/questions/306126/%D0%92%D0%B0%D0%BB%D0%B8%D0%B4%D0%B0%D1%86%D0%B8%D1%8F-email-%D0%B2-python
     pattern = r"^[-\w\.]+@([-\w]+\.)+[-\w]{2,4}$"
 
     if re.match(pattern, email):
         message = f'Вы указали этот email {email}'
         moltin.create_customer_in_cms(update.message.chat_id, email, db)
-        # status = 'HANDLE_PHONE'
     else:
         message = 'Вы указали не корректный email'
-        # status = 'HANDLE_EMAIL'
 
     bot.send_message(text=message,
                      chat_id=update.message.chat_id,)
 
-    # return status
+    # return HANDLE_WORK_MANAGER
 
 
 def handle_users_reply(bot, update, moltin, db):
