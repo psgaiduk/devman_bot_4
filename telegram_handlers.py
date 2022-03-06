@@ -4,6 +4,7 @@ import logging
 from functools import partial
 from telegram_function import send_product_photo, create_cart, create_start_menu
 
+
 logger = logging.getLogger('app_logger')
 
 
@@ -98,15 +99,22 @@ def handle_wait_email(bot, update, moltin, db):
     pattern = r"^[-\w\.]+@([-\w]+\.)+[-\w]{2,4}$"
 
     if re.match(pattern, email):
-        message = f'Вы указали этот email {email}'
+        message = f'''Вы указали этот email {email}
+
+Наш менеджер с вами свяжется в ближайшее время
+Чтобы начать покупки снова, отправьте любое сообщение    
+'''
         moltin.create_customer_in_cms(update.message.chat_id, email, db)
+        moltin.delete_item_from_cart(update.message.chat_id)
+        state = 'START'
     else:
         message = 'Вы указали не корректный email'
+        state = 'HANDLE_WAIT_EMAIL'
 
     bot.send_message(text=message,
                      chat_id=update.message.chat_id,)
 
-    # return HANDLE_WORK_MANAGER
+    return state
 
 
 def handle_users_reply(bot, update, moltin, db):

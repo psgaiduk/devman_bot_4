@@ -1,5 +1,6 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 import logging
+from textwrap import dedent
 
 
 logger = logging.getLogger('app_logger')
@@ -29,8 +30,12 @@ def create_cart(bot, moltin, chat_id, query):
         items = []
         for item in cart_items:
             items.append({'id': item['id'], 'name': item['name']})
-            message += f'\n\n\n*{item["name"]}*\n\n' \
-                       f'{item["quantity"]} кг - за {item["meta"]["display_price"]["with_tax"]["value"]["formatted"]}'
+            message += f'''
+            
+            
+*{item["name"]}*
+            
+{item["quantity"]} кг - за {item["meta"]["display_price"]["with_tax"]["value"]["formatted"]}'''
         message += f'\n\n*Общая цена {cart_price}*'
         keyboard = [[InlineKeyboardButton(f'Оплатить товары на сумму: {cart_price}', callback_data='payment')]]
 
@@ -41,7 +46,7 @@ def create_cart(bot, moltin, chat_id, query):
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    bot.send_message(text=message,
+    bot.send_message(text=dedent(message),
                      chat_id=chat_id,
                      message_id=query.message.message_id,
                      reply_markup=reply_markup,
@@ -64,12 +69,15 @@ def send_product_photo(moltin, bot, product_id, query, reply_markup):
     if quantity_item:
         text_quantity = f'\n\nВ корзине уже {quantity_item[0]} кг'
 
-    message = f'*{product["name"]}*\n\n{product["description"]}\n' \
-              f'{product["meta"]["display_price"]["with_tax"]["formatted"]} за кг.\n' \
-              f'В наличии: {product["meta"]["stock"]["level"]} кг.{text_quantity}'
+    message = f'''*{product["name"]}*
+    
+{product["description"]}
+{product["meta"]["display_price"]["with_tax"]["formatted"]} за кг.
+    
+В наличии: {product["meta"]["stock"]["level"]} кг.{text_quantity}'''
 
     bot.send_photo(photo=image_product,
-                   caption=message,
+                   caption=dedent(message),
                    chat_id=query.message.chat_id,
                    reply_markup=reply_markup,
                    parse_mode=ParseMode.MARKDOWN)
