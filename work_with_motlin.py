@@ -47,13 +47,11 @@ class WorkMoltin:
         logger.debug(f'Start work get image product\nproduct_id = {product_id}')
         url = f'{self.url}files/{product_id}'
         logger.debug(f'create url = {url}')
-        # Временно заменил, я так понял проблемы с амазоном из-за последних событий
-        # image_data = get(url, headers=self.header)
-        # self.check_status(image_data)
-        # image_data_json = image_data.json()
-        # logger.debug(f'get image data in json\n{image_data_json}')
-        # return image_data_json['data']['link']['href']
-        return 'https://e1.edimdoma.ru/data/ingredients/0000/5509/5509-ed4_wide.jpg'
+        image_data = get(url, headers=self.get_header())
+        self.check_status(image_data)
+        image_data_json = image_data.json()
+        logger.debug(f'get image data in json\n{image_data_json}')
+        return image_data_json['data']['link']['href']
 
     def add_to_cart(self, product_id, chat_id, quantity):
         logger.debug(f'Start work add to cart\nproduct_id = {product_id}\n'
@@ -86,19 +84,6 @@ class WorkMoltin:
         logger.debug(f'cart items = {cart_items}')
         print(cart_items)
         return cart_price, cart_items
-
-    # def clear_cart(self, chat_id):
-    #     logger.debug(f'Start clear cart\nchat_id = {chat_id}')
-    #     url = f'{self.url}carts/{chat_id}/items'
-    #     logger.debug(f'create url = {url}')
-    #     cart_items_data = get(url, headers=self.get_header())
-    #     self.check_status(cart_items_data)
-    #     cart_items_json = cart_items_data.json()
-    #     logger.debug(f'get cart items json\n{cart_items_json}')
-    #     cart_items = cart_items_json['data']
-    #     logger.debug(f'cart items = {cart_items}')
-    #
-    #     return cart_items
 
     def delete_item_from_cart(self, chat_id, item_id=''):
         logger.debug(f'Start work delete item from cart\n'
