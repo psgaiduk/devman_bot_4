@@ -33,24 +33,27 @@ class WorkMoltin:
         logger.debug(f'return header = {header}')
         return header
 
+    def get_json_data_from_moltin(self, url):
+        logger.debug(f'Start work get json data from moltin\nurl = {url}')
+        logger.debug(f'create url = {url}')
+        data = get(url, headers=self.get_header())
+        self.check_status(data)
+        data_json = data.json()
+        logger.debug(f'get products data in json\n{data_json}')
+        return data_json
+
     def get_products(self, product_id=''):
         logger.debug(f'Start work get products\nproduct_id = {product_id}')
         url = f'{self.url}products{product_id}'
         logger.debug(f'create url = {url}')
-        products_data = get(url, headers=self.get_header())
-        self.check_status(products_data)
-        products_data_json = products_data.json()
-        logger.debug(f'get products data in json\n{products_data_json}')
+        products_data_json = self.get_json_data_from_moltin(url)
         return products_data_json['data']
 
     def get_image_product(self, product_id):
         logger.debug(f'Start work get image product\nproduct_id = {product_id}')
         url = f'{self.url}files/{product_id}'
         logger.debug(f'create url = {url}')
-        image_data = get(url, headers=self.get_header())
-        self.check_status(image_data)
-        image_data_json = image_data.json()
-        logger.debug(f'get image data in json\n{image_data_json}')
+        image_data_json = self.get_json_data_from_moltin(url)
         return image_data_json['data']['link']['href']
 
     def add_to_cart(self, product_id, chat_id, quantity):
@@ -68,18 +71,12 @@ class WorkMoltin:
         logger.debug(f'Start work get cart\nchat_id = {chat_id}')
         url = f'{self.url}carts/{chat_id}'
         logger.debug(f'create url = {url}')
-        cart_price_data = get(url, headers=self.get_header())
-        self.check_status(cart_price_data)
-        cart_price_json = cart_price_data.json()
-        logger.debug(f'get cart price json\n{cart_price_json}')
+        cart_price_json = self.get_json_data_from_moltin(url)
         cart_price = cart_price_json['data']['meta']['display_price']['with_tax']['formatted']
         logger.debug(f'get cart price = {cart_price}')
         url = f'{self.url}carts/{chat_id}/items'
         logger.debug(f'create url = {url}')
-        cart_items_data = get(url, headers=self.get_header())
-        self.check_status(cart_items_data)
-        cart_items_json = cart_items_data.json()
-        logger.debug(f'get cart items json\n{cart_items_json}')
+        cart_items_json = self.get_json_data_from_moltin(url)
         cart_items = cart_items_json['data']
         logger.debug(f'cart items = {cart_items}')
         print(cart_items)
