@@ -24,12 +24,12 @@ class WorkMoltin:
         url = 'https://api.moltin.com/oauth/access_token'
         data = {'client_id': self.client_id, 'client_secret': self.secret_code, 'grant_type': 'client_credentials'}
         logger.debug(f'data for get token\nurl = {url}\ndata = {data}')
-        data_for_token = post(url=url, data=data)
-        logger.debug(f'get data token\n{data_for_token}')
-        self.check_status(data_for_token)
-        data_for_token_json = data_for_token.json()
-        logger.debug(f'json token\n{data_for_token_json}')
-        token = data_for_token_json['access_token']
+        response_with_token = post(url=url, data=data)
+        logger.debug(f'get data token\n{response_with_token}')
+        self.check_status(response_with_token)
+        dict_with_token = response_with_token.json()
+        logger.debug(f'dict with token\n{dict_with_token}')
+        token = dict_with_token['access_token']
         header = {'authorization': f'Bearer {token}', 'content-type': 'application/json'}
         logger.debug(f'return header = {header}')
         return header
