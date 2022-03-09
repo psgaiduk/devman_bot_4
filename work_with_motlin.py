@@ -82,13 +82,22 @@ class WorkMoltin:
         logger.debug(f'cart items = {cart_items}')
         return cart_price, cart_items
 
-    def delete_item_from_cart(self, chat_id, item_id=''):
+    def delete_item_from_cart(self, chat_id, item_id):
         logger.debug(f'Start work delete item from cart\n'
                      f'chat_id = {chat_id}\n'
                      f'item_id = {item_id}')
         if item_id:
             item_id = f'/{item_id}'
         url = f'{self.url}carts/{chat_id}/items{item_id}'
+        logger.debug(f'create url = {url}')
+        data = delete(url, headers=self.get_header())
+        self.check_status(data)
+
+    def delete_all_from_cart(self, chat_id):
+        logger.debug(f'Start work delete item from cart\n'
+                     f'chat_id = {chat_id}')
+
+        url = f'{self.url}carts/{chat_id}/items'
         logger.debug(f'create url = {url}')
         data = delete(url, headers=self.get_header())
         self.check_status(data)

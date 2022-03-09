@@ -105,7 +105,7 @@ def handle_wait_email(bot, update, moltin, db):
 Чтобы начать покупки снова, отправьте любое сообщение    
 '''
         moltin.create_customer_in_cms(update.message.chat_id, email, db)
-        moltin.delete_item_from_cart(update.message.chat_id)
+        moltin.delete_all_from_cart(update.message.chat_id)
         state = 'START'
     else:
         message = 'Вы указали не корректный email'
