@@ -14,9 +14,10 @@ class WorkMoltin:
 
     @staticmethod
     def check_status(data):
-        logger.debug(f'get status {data.status_code}')
-        if data.status_code >= 300:
-            logger.error(f'Что-то пошло не так код {data.status_code}\n{data.text}')
+        try:
+            data.raise_for_status()
+        except Exception as err:
+            logger.exception(err)
 
     def get_header(self):
         logger.debug('start get header')
@@ -39,7 +40,7 @@ class WorkMoltin:
         data = get(url, headers=self.get_header())
         self.check_status(data)
         data_json = data.json()
-        logger.debug(f'get products data in json\n{data_json}')
+        logger.debug(f'get data in json\n{data_json}')
         return data_json
 
     def get_products(self, product_id=''):
@@ -79,7 +80,6 @@ class WorkMoltin:
         cart_items_json = self.get_json_data_from_moltin(url)
         cart_items = cart_items_json['data']
         logger.debug(f'cart items = {cart_items}')
-        print(cart_items)
         return cart_price, cart_items
 
     def delete_item_from_cart(self, chat_id, item_id=''):
