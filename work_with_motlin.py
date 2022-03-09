@@ -43,9 +43,16 @@ class WorkMoltin:
         logger.debug(f'get data in dict\n{data}')
         return data
 
-    def get_products(self, product_id=''):
+    def get_product(self, product_id):
         logger.debug(f'Start work get products\nproduct_id = {product_id}')
-        url = f'{self.url}products{product_id}'
+        url = f'{self.url}products/{product_id}'
+        logger.debug(f'create url = {url}')
+        products = self.get_data_from_moltin(url)
+        return products['data']
+
+    def get_all_products(self):
+        logger.debug(f'Start work get products')
+        url = f'{self.url}products'
         logger.debug(f'create url = {url}')
         products = self.get_data_from_moltin(url)
         return products['data']

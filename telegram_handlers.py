@@ -13,7 +13,7 @@ def start(_, update, moltin):
     Хэндлер для состояния START.
     """
 
-    products = moltin.get_products()
+    products = moltin.get_all_products()
 
     keyboard = [[InlineKeyboardButton(product["name"], callback_data=product['id'])] for product in products]
 

@@ -7,7 +7,7 @@ logger = logging.getLogger('app_logger')
 
 
 def create_start_menu(moltin, bot, chat_id, query):
-    products = moltin.get_products()
+    products = moltin.get_all_products()
 
     keyboard = [[InlineKeyboardButton(product["name"], callback_data=product['id'])] for product in products]
 
@@ -57,7 +57,7 @@ def create_cart(bot, moltin, chat_id, query):
 
 
 def send_product_photo(moltin, bot, product_id, query, reply_markup):
-    product = moltin.get_products(product_id=f'/{product_id}')
+    product = moltin.get_product(product_id=f'{product_id}')
 
     image_id = product['relationships']['main_image']['data']['id']
     image_product = moltin.get_image_product(product_id=image_id)
