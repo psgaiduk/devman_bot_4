@@ -6,7 +6,7 @@ from telegram.ext import Filters, Updater
 from telegram.ext import CallbackQueryHandler, CommandHandler, MessageHandler
 from logger_handler import BotHandler
 from functools import partial
-from work_with_motlin import WorkMoltin
+from moltin import WorkMoltin
 from telegram_handlers import handle_users_reply
 
 

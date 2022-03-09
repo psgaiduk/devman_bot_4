@@ -2,7 +2,7 @@ import re
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 import logging
 from functools import partial
-from telegram_function import send_product_photo, create_cart, create_start_menu
+from send_messages_for_tg import send_product_photo, create_cart, create_start_menu
 
 
 logger = logging.getLogger('app_logger')
