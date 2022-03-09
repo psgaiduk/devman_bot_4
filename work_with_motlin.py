@@ -1,6 +1,7 @@
+import time
+
 from requests import post, get, delete
 import logging
-
 
 logger = logging.getLogger('app_logger')
 
@@ -11,6 +12,8 @@ class WorkMoltin:
         self.client_id = client_id
         self.secret_code = secret_code
         self.url = 'https://api.moltin.com/v2/'
+        self.time_get_header = None
+        self.header = self.get_header()
 
     @staticmethod
     def check_status(data):
@@ -20,6 +23,10 @@ class WorkMoltin:
             logger.exception(err)
 
     def get_header(self):
+        if self.time_get_header:
+            time_passed_since_get_token = time.time() - self.time_get_header
+            if time_passed_since_get_token < 3550:
+                return self.header
         logger.debug('start get header')
         url = 'https://api.moltin.com/oauth/access_token'
         data = {'client_id': self.client_id, 'client_secret': self.secret_code, 'grant_type': 'client_credentials'}
@@ -32,6 +39,8 @@ class WorkMoltin:
         token = dict_with_token['access_token']
         header = {'authorization': f'Bearer {token}', 'content-type': 'application/json'}
         logger.debug(f'return header = {header}')
+        self.time_get_header = time.time()
+        self.header = header
         return header
 
     def get_data_from_moltin(self, url):
@@ -115,12 +124,12 @@ class WorkMoltin:
         url = f'{self.url}customers'
         logger.debug(f'create url = {url}')
         data = {
-         "data": {
-           "type": "customer",
-           "name": str(chat_id),
-           "email": email,
-           "password": "mysecretpassword"
-         }
+            "data": {
+                "type": "customer",
+                "name": str(chat_id),
+                "email": email,
+                "password": "mysecretpassword"
+            }
         }
         logger.debug(f'create data for get customer\n{data}')
         customer_data = post(url, headers=self.get_header(), json=data)
