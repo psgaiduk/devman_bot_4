@@ -93,9 +93,7 @@ class WorkMoltin:
         logger.debug(f'Start work delete item from cart\n'
                      f'chat_id = {chat_id}\n'
                      f'item_id = {item_id}')
-        if item_id:
-            item_id = f'/{item_id}'
-        url = f'{self.url}carts/{chat_id}/items{item_id}'
+        url = f'{self.url}carts/{chat_id}/items/{item_id}'
         logger.debug(f'create url = {url}')
         data = delete(url, headers=self.get_header())
         self.check_status(data)
