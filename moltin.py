@@ -25,15 +25,15 @@ class WorkMoltin:
         url = 'https://api.moltin.com/oauth/access_token'
         data = {'client_id': self.client_id, 'client_secret': self.secret_code, 'grant_type': 'client_credentials'}
         logger.debug(f'data for get token\nurl = {url}\ndata = {data}')
-        response_with_token = post(url=url, data=data)
-        logger.debug(f'get data token\n{response_with_token}')
-        response_with_token.raise_for_status()
-        dict_with_token = response_with_token.json()
-        logger.debug(f'dict with token\n{dict_with_token}')
-        token = dict_with_token['access_token']
-        header = {'authorization': f'Bearer {token}', 'content-type': 'application/json'}
+        response = post(url=url, data=data)
+        logger.debug(f'get data token\n{response}')
+        response.raise_for_status()
+        moltin_token = response.json()
+        logger.debug(f'dict with token\n{response}')
+        access_token = moltin_token['access_token']
+        header = {'authorization': f'Bearer {access_token}', 'content-type': 'application/json'}
         logger.debug(f'return header = {header}')
-        self.time_token_expires = dict_with_token['expires_in']
+        self.time_token_expires = moltin_token['expires_in']
         self.time_get_header = time.time()
         self.header = header
         return header
